@@ -1,12 +1,13 @@
 // Code splitting
 // http://localhost:3000/isolated/exercise/01.js
 
-import * as React from 'react';
+import * as React from 'react'
 
-const Globe = React.lazy(() => import('../globe'));
+const loadGlobe = () => import('../globe')
+const Globe = React.lazy(loadGlobe)
 
 function App() {
-  const [showGlobe, setShowGlobe] = React.useState(false);
+  const [showGlobe, setShowGlobe] = React.useState(false)
 
   return (
     <div
@@ -19,7 +20,11 @@ function App() {
         padding: '2rem',
       }}
     >
-      <label style={{ marginBottom: '1rem' }}>
+      <label
+        style={{marginBottom: '1rem'}}
+        onMouseEnter={loadGlobe}
+        onFocus={loadGlobe}
+      >
         <input
           type="checkbox"
           checked={showGlobe}
@@ -27,13 +32,13 @@ function App() {
         />
         {' show globe'}
       </label>
-      <div style={{ width: 400, height: 400 }}>
+      <div style={{width: 400, height: 400}}>
         <React.Suspense fallback={<div>Loading Globe...</div>}>
-          {showGlobe ? <Globe/> : null}
+          {showGlobe ? <Globe /> : null}
         </React.Suspense>
       </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
