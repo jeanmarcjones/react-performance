@@ -13,7 +13,6 @@ import {
 const DogStateProvider = React.createContext()
 
 function dogReducer(state, action) {
-
   switch (action.type) {
     case 'TYPED_IN_DOG_INPUT': {
       return {...state, dogName: action.dogName}
@@ -31,7 +30,7 @@ function DogProvider({children}) {
   const value = [state, dispatch]
   return (
     <DogStateProvider.Provider value={value}>
-        {children}
+      {children}
     </DogStateProvider.Provider>
   )
 }
@@ -110,17 +109,20 @@ function Grid() {
     />
   )
 }
+
 Grid = React.memo(Grid)
 
-function Cell({row, column}) {
-  const state = useGridState()
-  const cell = state.grid[row][column]
-
-  return (<CellImpl cell={cell} row={row} column={column} />)
+function withStateSlice(Comp, slice) {
+  const MemoComp = React.memo(Comp)
+  function Wrapper(props, ref) {
+    const state = useGridState()
+    return <MemoComp ref={ref} state={slice(props, state)} {...props} />
+  }
+  Wrapper.displayName = `withStateSlice(${Comp.displayName || Comp.name})`
+  return React.memo(React.forwardRef(Wrapper))
 }
-Cell = React.memo(Cell)
 
-function CellImpl({row, column, cell}) {
+function Cell({row, column, state: cell}) {
   const dispatch = useGridDispatch()
   const handleClick = () => dispatch({type: 'UPDATE_GRID_CELL', row, column})
 
@@ -137,11 +139,12 @@ function CellImpl({row, column, cell}) {
     </button>
   )
 }
-CellImpl = React.memo(CellImpl)
+
+Cell = withStateSlice(Cell, ({row, column}, state) => state.grid[row][column])
 
 function DogNameInput() {
   const [state, dispatch] = useDogState()
-  const { dogName } = state
+  const {dogName} = state
 
   function handleChange(event) {
     const newDogName = event.target.value
@@ -165,19 +168,20 @@ function DogNameInput() {
     </form>
   )
 }
+
 function App() {
   const forceRerender = useForceRerender()
   return (
     <div className="grid-app">
       <button onClick={forceRerender}>force rerender</button>
-        <div>
-          <DogProvider>
-            <DogNameInput />
-          </DogProvider>
-          <GridProvider>
-            <Grid />
-          </GridProvider>
-        </div>
+      <div>
+        <DogProvider>
+          <DogNameInput />
+        </DogProvider>
+        <GridProvider>
+          <Grid />
+        </GridProvider>
+      </div>
     </div>
   )
 }
